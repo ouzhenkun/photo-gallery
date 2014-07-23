@@ -1,3 +1,31 @@
-<div>
-  Login
+<div class="modal-header">
+    <h1 class="modal-title">登录相册</h1>
+</div>
+<div class="modal-body">
+    <form class="form-group">
+        <div class="form-group">
+            <label for="fu-login-username">
+                用户名：
+            </label>
+            <input type="text"
+                   id="fu-login-username"
+                   class="form-control"
+                   ng-model="username">
+            </input>
+        </div>
+        <div class="form-group">
+            <label for="fu-login-password">
+                密码：
+            </label>
+            <input type="password"
+                   id="fu-login-password"
+                   class="form-control"
+                   ng-model="password">
+            </input>
+        </div>
+    </form>
+</div>
+<div class="modal-footer">
+    <button ng-click="cancel()" class="btn btn-warning">取消</button>
+    <button ng-click="login()"  class="btn btn-primary">登录</button>
 </div>
