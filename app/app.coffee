@@ -21,8 +21,9 @@ angular.module('photo-gallery', [
 
         login: ->
            modalInstance = $modal.open(
-              templateUrl : '/partials/login.html'
+              backdrop    : false
               controller  : 'LoginCtrl'
+              templateUrl : '/partials/login.html'
             )
 
         register: ->
@@ -33,20 +34,27 @@ angular.module('photo-gallery', [
 
 .controller 'LoginCtrl', (
     $scope
+    $http
     $modalInstance
 ) ->
 
     _.extend $scope,
+        state   : 'init' #init, loggingIn, error
         username: ''
         password: ''
 
         login: ->
-            console.debug "login...#{@username}, #{@password}"
-            $modalInstance.close()
+            @state = 'loggingIn'
+            $http(
+                method: 'POST'
+                url: "/authenticate/login"
+                params: {username: @username, password: @password}
+            ).success((data) =>
+                $modalInstance.close()
+            ).error((error) =>
+                @state = 'error'
+            )
 
         cancel: ->
             $modalInstance.dismiss('cancel')
-
-.run () ->
-    console.debug "running..."
 
