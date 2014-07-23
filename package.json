@@ -1,0 +1,25 @@
+{
+  "name": "photo-gallery",
+  "description": "Build a photo gallery using AngularJS",
+  "author": "Ryan Ou",
+  "version": "0.0.1",
+  "repository": "",
+  "scripts": {
+    "start": "brunch watch --server",
+    "test": "brunch test"
+  },
+  "dependencies": {
+    "javascript-brunch": ">= 1.0 < 1.8",
+    "coffee-script-brunch": ">= 1.0 < 1.8",
+    "coffee-script": "~1.7",
+    "css-brunch": ">= 1.0 < 1.8",
+    "uglify-js-brunch": ">= 1.0 < 1.8",
+    "clean-css-brunch": ">= 1.0 < 1.8"
+  },
+  "devDependencies": {
+    "karma": "~0.12",
+    "karma-jasmine": "~0.1",
+    "karma-coffee-preprocessor": "~0.1",
+    "karma-phantomjs-launcher": "~0.1"
+  }
+}
