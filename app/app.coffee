@@ -27,7 +27,11 @@ angular.module('photo-gallery', [
             )
 
         register: ->
-            console.debug "register..."
+           modalInstance = $modal.open(
+              backdrop    : false
+              controller  : 'LoginCtrl'
+              templateUrl : '/partials/register.html'
+            )
 
         logout: ->
             console.debug "logout..."
@@ -39,12 +43,24 @@ angular.module('photo-gallery', [
 ) ->
 
     _.extend $scope,
-        state   : 'init' #init, loggingIn, error
-        username: ''
-        password: ''
+        username   : ''
+        password   : ''
+        confirmPWD : ''
 
+        processing : false
+        error      : undefined
+
+        #TODO refactor
         login: ->
-            @state = 'loggingIn'
+            @removeError()
+            if @username == ''
+                @error = "请输入用户名。"
+                return
+            if @password == ''
+                @error = "请输入登录密码。"
+                return
+
+            @processing = true
             $http(
                 method: 'POST'
                 url: "/authenticate/login"
@@ -52,8 +68,39 @@ angular.module('photo-gallery', [
             ).success((data) =>
                 $modalInstance.close()
             ).error((error) =>
-                @state = 'error'
+                @processing = false
+                @error = "登录错误。"
             )
+
+        register: ->
+            @removeError()
+            if @username == ''
+                @error = "请输入用户名。"
+                return
+            if @password == ''
+                @error = "请输入登录密码。"
+                return
+            if @confirmPWD == ''
+                @error = "请再次输入登录密码。"
+                return
+            if @password != @confirmPWD
+                @error = "两次输入的密码不一致。"
+                return
+
+            @processing = true
+            $http(
+                method: 'POST'
+                url: "/authenticate/register"
+                params: {username: @username, password: @password}
+            ).success((data) =>
+                $modalInstance.close()
+            ).error((error) =>
+                @processing = false
+                @error = "注册错误。"
+            )
+
+        removeError: ->
+            @error = undefined
 
         cancel: ->
             $modalInstance.dismiss('cancel')

@@ -1,5 +1,5 @@
 <div class="modal-header">
-    <h1 class="modal-title">登录相册</h1>
+    <h1 class="modal-title">注册新账户</h1>
 </div>
 <div class="modal-body">
     <form class="form-group">
@@ -25,6 +25,18 @@
                    ng-model="password">
             </input>
         </div>
+        <div class="form-group">
+            <label for="fu-login-password">
+                确认密码：
+            </label>
+            <input type="password"
+                   id="fu-login-password"
+                   class="form-control"
+                   required
+                   ng-disabled="state=='processing'"
+                   ng-model="confirmPWD">
+            </input>
+        </div>
     </form>
     <alert ng-show="error!=undefined"
            type="danger"
@@ -36,12 +48,13 @@
   <button ng-click="cancel()"
           class="btn btn-warning"
           ng-disabled="state=='processing'">
-      取消
+        取消
   </button>
-    <button ng-click="login()"
+    <button ng-click="register()"
             class="btn btn-primary"
             ng-disabled="state=='processing'">
-      <span ng-if="state!='processing'">登录</span>
-      <span ng-if="state=='processing'">登录中...</span>
+      <span ng-if="state!='processing'">注册<span>
+      <span ng-if="state=='processing'">注册中...</span>
     </button>
 </div>
+

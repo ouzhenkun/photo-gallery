@@ -20,12 +20,18 @@ angular.module('photo-gallery-dev', [
             proxy[key] = $delegate[key]
         proxy
 
+
 .run ($httpBackend) ->
 
     console.debug "running... dev"
 
+    # 模拟 登录服务端
     $httpBackend.whenPOST(/authenticate\/login/).respond (method, url, data) ->
         console.debug "post login...#{url}"
+        [200]
+
+    $httpBackend.whenPOST(/authenticate\/register/).respond (method, url, data) ->
+        console.debug "post register...#{url}"
         [200]
 
     $httpBackend.whenGET(/.*/).passThrough()
