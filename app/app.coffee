@@ -7,18 +7,53 @@ angular.module('photo-gallery', [
 
 .config ($routeProvider, $locationProvider) ->
     $routeProvider
-        .when('/home',  {templateUrl: '/partials/home.html'})
+        .when('/home',  {templateUrl: '/partials/home.html', auth: true})
 
     $locationProvider.html5Mode(true)
 
-.controller 'AppCtrl', (
-    $scope
-    $modal
-) ->
+
+.factory '$localStorage', ->
+    set: (key, value) -> window.localStorage?[key] = JSON.stringify(value)
+    get: (key)        -> JSON.parse(localStorage?[key] || null)
+
+
+.factory 'Session', ($http, $route, $location, $rootScope) ->
+    service =
+        getCurrentUser: -> angular.copy @currentUser
+        setCurrentUser: (user) -> @currentUser = user
+        isAuthenticated: -> @currentUser?
+
+        setup: ->
+            if !@currentUser?
+                $http.get("/authenticate/user").success (user) ->
+                    console.debug user
+                    $rootScope.$broadcast 'auth:currentUserUpdated', user
+        logout: ->
+            $http.get("/authenticate/logout").success ->
+                $rootScope.$broadcast 'auth:currentUserUpdated', null
+
+    gotoDefaultPath = (auth) ->
+        if !auth && service.isAuthenticated()
+            $location.path "/home"
+        else if auth && !service.isAuthenticated()
+            $location.path "/"
+
+    $rootScope.$on 'auth:currentUserUpdated', (event, user) ->
+        service.setCurrentUser user
+        gotoDefaultPath($route?.current?.auth)
+
+    $rootScope.$on '$routeChangeSuccess', (event, current) -> _.defer ->
+        gotoDefaultPath(current?.auth)
+
+    service
+
+
+.controller 'AppCtrl', ($scope, $modal, Session) ->
+
+    Session.setup()
 
     _.extend $scope,
-        loggedIn: false
-
+        session: Session
         login: ->
            modalInstance = $modal.open(
               backdrop    : false
@@ -33,70 +68,44 @@ angular.module('photo-gallery', [
               templateUrl : '/partials/register.html'
             )
 
-        logout: ->
-            console.debug "logout..."
-
-.controller 'LoginCtrl', (
-    $scope
-    $http
-    $modalInstance
-) ->
+.controller 'LoginCtrl', ($scope, $http, $rootScope, $modalInstance) ->
 
     _.extend $scope,
-        username   : ''
-        password   : ''
-        confirmPWD : ''
+        username   : undefined
+        password   : undefined
+        confirmPWD : undefined
 
         processing : false
         error      : undefined
 
-        #TODO refactor
         login: ->
             @removeError()
-            if @username == ''
-                @error = "请输入用户名。"
-                return
-            if @password == ''
-                @error = "请输入登录密码。"
-                return
-
             @processing = true
             $http(
                 method: 'POST'
                 url: "/authenticate/login"
                 params: {username: @username, password: @password}
-            ).success((data) =>
+            ).success((user) =>
+                $rootScope.$broadcast 'auth:currentUserUpdated', user
                 $modalInstance.close()
             ).error((error) =>
                 @processing = false
-                @error = "登录错误。"
+                @error = error
             )
 
         register: ->
             @removeError()
-            if @username == ''
-                @error = "请输入用户名。"
-                return
-            if @password == ''
-                @error = "请输入登录密码。"
-                return
-            if @confirmPWD == ''
-                @error = "请再次输入登录密码。"
-                return
-            if @password != @confirmPWD
-                @error = "两次输入的密码不一致。"
-                return
-
             @processing = true
             $http(
                 method: 'POST'
                 url: "/authenticate/register"
-                params: {username: @username, password: @password}
-            ).success((data) =>
+                params: {username: @username, password: @password, confirmPWD: @confirmPWD}
+            ).success((newUser) =>
+                $rootScope.$broadcast 'auth:currentUserUpdated', newUser
                 $modalInstance.close()
             ).error((error) =>
                 @processing = false
-                @error = "注册错误。"
+                @error = error
             )
 
         removeError: ->
@@ -104,4 +113,11 @@ angular.module('photo-gallery', [
 
         cancel: ->
             $modalInstance.dismiss('cancel')
+
+.directive 'ngEnter', ->
+    (scope, element, attrs) ->
+        element.bind "keydown keypress", (event) ->
+            if event.which == 13
+                scope.$apply(-> scope.$eval(attrs.ngEnter))
+                event.preventDefault()
 

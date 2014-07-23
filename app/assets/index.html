@@ -11,10 +11,25 @@
   </script>
 </head>
 <body ng-controller="AppCtrl">
-  Photo Gallery
-  <a ng-click="login()">login</a>
-  <a ng-click="register()">register</a>
-  <a ng-if="loggedIn" ng-click="logout()">logout</a>
+  <h3>
+    Photo Gallery
+  </h3>
+  <h4 ng-show="session.isAuthenticated()">你好，{{session.getCurrentUser().username}}</h4>
+  <button ng-click="login()"
+          class="btn btn-primary"
+          ng-show="!session.isAuthenticated()">
+    登录相册
+  </button>
+  <button ng-click="register()"
+          class="btn btn-primary"
+          ng-show="!session.isAuthenticated()">
+    注册新账户
+  </button>
+  <button ng-click="session.logout()"
+          class="btn btn-primary"
+          ng-show="session.isAuthenticated()">
+    退出
+  </button>
   <div ng-view></div>
 </body>
 </html>

@@ -10,7 +10,7 @@
             <input type="text"
                    id="fu-login-username"
                    class="form-control"
-                   ng-disabled="state=='processing'"
+                   ng-disabled="processing"
                    ng-model="username">
             </input>
         </div>
@@ -21,7 +21,8 @@
             <input type="password"
                    id="fu-login-password"
                    class="form-control"
-                   ng-disabled="state=='processing'"
+                   ng-disabled="processing"
+                   ng-enter="login()"
                    ng-model="password">
             </input>
         </div>
@@ -35,13 +36,13 @@
 <div class="modal-footer">
   <button ng-click="cancel()"
           class="btn btn-warning"
-          ng-disabled="state=='processing'">
+          ng-disabled="processing">
       取消
   </button>
     <button ng-click="login()"
             class="btn btn-primary"
-            ng-disabled="state=='processing'">
-      <span ng-if="state!='processing'">登录</span>
-      <span ng-if="state=='processing'">登录中...</span>
+            ng-disabled="processing">
+      <span ng-show="!processing">登录</span>
+      <span ng-show="processing">登录中...</span>
     </button>
 </div>
