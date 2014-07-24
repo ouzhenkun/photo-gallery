@@ -19,3 +19,9 @@
 * `app/*` - 主程序, 包括 程序逻辑，html模板，css样式
 * `app/mocks.coffee` - 主要做 服务端 的模拟
 * `vendor` - 第3方依赖包
+
+主要的功能：
+* User Login/Register/Logout, Reload
+* Upload photo - done 50% 点击上传 会给当前用户创建一个新的图片信息，并保存到模拟数据库
+* Display photo thumbnail in a fancy way - done 50% 从模拟数据库中获取当前用户的图片信息，并用幻灯片展示
+* 加了一个模拟后端，方便前端开发
