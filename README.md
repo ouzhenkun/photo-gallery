@@ -3,11 +3,11 @@
 使用 AngularJS + CoffeeScript + Brunch
 
 ## Getting started
-* 安装 [Brunch](http://brunch.io): `npm install -g brunch`.
-* 安装 Brunch 插件: `npm install`.
+* 安装 [Brunch](http://brunch.io): `npm install -g brunch`
+* 安装 Brunch 插件: `npm install` (如果抛错，很可能是网络原因，试试 `npm config set registry https://registry.npmjs.org/`)
 * 安装 [Bower](http://bower.io) components: `bower install`
 * 运行程序可以使用 `sh server.sh`. 正常情况会启动在 http://localhost:3333
-* 用户登录：`{username:'test', password:123}, {username:'ryan', password:123}`, 也可以注册新用户。
+* 用户登录：`{username:'test', password:123}, {username:'ryan', password:123}`, 也可以注册新用户
 * 如果需要重新构建可以运行 `sh setup.sh`
 
 最终生成的文件都在 `public/` 目录下：
