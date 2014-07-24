@@ -12,8 +12,8 @@ angular.module('photo-gallery', [
 .config ($routeProvider, $locationProvider) ->
     $routeProvider
         .when('/home',  {templateUrl: '/partials/home.html', auth: true})
-
     $locationProvider.html5Mode(true)
+
 
 .controller 'AppCtrl', ($scope, $http, $rootScope, $modal, Session, Photo) ->
 
@@ -37,8 +37,9 @@ angular.module('photo-gallery', [
             )
 
         upload: ->
-            $http.get("/photos/token").success (token) ->
-                console.debug "TODO upload photo with token: #{token}"
+            #TODO upload photo with token
+            $http.get("/upload/token").success (token) ->
+                console.debug token
 
             newPhoto = _.extend new Photo,
                 id   : 'new'
