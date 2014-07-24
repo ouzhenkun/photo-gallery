@@ -1,13 +1,34 @@
 'use strict'
 
+# 封装主App，用 ngMockE2E 模拟其中的服务器请求
 angular.module('photo-gallery-dev', [
     'photo-gallery'
     'ngMockE2E'
 ])
 
+# 存取 Json 格式信息到 localStorage
 .factory '$localStorage', ->
     set: (key, value) -> window.localStorage?[key] = JSON.stringify(value)
-    get: (key)        -> JSON.parse(localStorage?[key] || null)
+    get: (key)        -> JSON.parse(localStorage?[key] ? null)
+
+# TODO 整合 qiniu 云
+.service 'QiniuService', ->
+    genDownPhoto: (photo) ->
+        id  : photo.id
+        text: photo.text
+        url : "http://placekitten.com/#{600+photo.id}/300"
+    genUpToken: (filename) ->
+        accessKey = '57r8ikBR1yNeWVLbe3NbjupXZI3Ihxi7ecPwhBF5'
+        secretKey = 'ndh92aY38OB8uoCCKfImKuetQ-WPbel1XbmU6piK'
+        putPolicy =
+            scope: "public-cloud3edu:#{filename}"
+            deadline: 1451491200
+        put_policy = JSON.stringify(putPolicy)
+        encoded = base64encode(utf16to8(put_policy))
+        hash = CryptoJS.HmacSHA1(encoded, secretKey)
+        encoded_signed = hash.toString(CryptoJS.enc.Base64)
+        upload_token = accessKey + ":" + safe64(encoded_signed) + ":" + encoded
+        upload_token
 
 # 延迟 $httpbackend 返回结果，模拟服务器请求延时行为
 .config ($provide) ->
@@ -24,8 +45,8 @@ angular.module('photo-gallery-dev', [
             proxy[key] = $delegate[key]
         proxy
 
-
 .run (
+    QiniuService
     $httpBackend
     $localStorage
 ) ->
@@ -46,7 +67,7 @@ angular.module('photo-gallery-dev', [
     $localStorage.set("db.users" , defaultUsers)  if !$localStorage.get("db.users")?
     $localStorage.set("db.photos", defaultPhotos) if !$localStorage.get("db.photos")?
 
-    # url 中的 queryString 转换成 paramsObject
+    # 将 url 中的 queryString 转换成 paramsObject
     getParams = (url) ->
         RE = /[?&]?([^=]+)=([^&]*)/g
         url = decodeURIComponent(url?.replace(/\+/g, '%20'))
@@ -103,35 +124,15 @@ angular.module('photo-gallery-dev', [
         $localStorage.set('cookies.user', null)
         [200]
 
-    # TODO 整合 qiniu 云
-    withQiniuUrl = (photo) ->
-        id  : photo.id
-        text: photo.text
-        url : "http://placekitten.com/#{600+photo.id}/300"
-    genUpToken = (user) ->
-        filename  = user.username + "-" + Date.now()
-        accessKey = '57r8ikBR1yNeWVLbe3NbjupXZI3Ihxi7ecPwhBF5'
-        secretKey = 'ndh92aY38OB8uoCCKfImKuetQ-WPbel1XbmU6piK'
-        putPolicy =
-            scope: "public-cloud3edu:#{filename}"
-            deadline: 1451491200
-        put_policy = JSON.stringify(putPolicy)
-        encoded = base64encode(utf16to8(put_policy))
-        hash = CryptoJS.HmacSHA1(encoded, secretKey)
-        encoded_signed = hash.toString(CryptoJS.enc.Base64)
-        upload_token = accessKey + ":" + safe64(encoded_signed) + ":" + encoded
-        upload_token
+    # 模拟 获取上传凭证-服务端
+    $httpBackend.whenGET("/upload/token").respond (method, url, data) ->
+        console.debug "get token: #{url}"
 
-    # 模拟 获取用户相册-服务端
-    $httpBackend.whenGET("/photos/token").respond (method, url, data) ->
-        console.debug "get photos token: #{url}"
         currentUser = $localStorage.get('cookies.user')
-
         if currentUser?
-            [200, genUpToken(currentUser)]
+            [200, QiniuService.genUpToken(currentUser.username+"-"+Date.now())]
         else
             [401]
-
 
     # 模拟 获取用户相册-服务端
     $httpBackend.whenGET(/photos\/all/).respond (method, url, data) ->
@@ -140,7 +141,7 @@ angular.module('photo-gallery-dev', [
 
         photos = _.chain($localStorage.get('db.photos'))
                   .filter((photo) -> photo.username == currentUser.username)
-                  .map(withQiniuUrl)
+                  .map(QiniuService.genDownPhoto)
                   .value()
         console.dir photos
         [200, photos]
@@ -159,6 +160,6 @@ angular.module('photo-gallery-dev', [
         dbPhotos.push newPhoto
         $localStorage.set('db.photos', dbPhotos)
 
-        [200, withQiniuUrl(newPhoto)]
+        [200, QiniuService.genDownPhoto(newPhoto)]
 
     $httpBackend.whenGET(/.*/).passThrough()
