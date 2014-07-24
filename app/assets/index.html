@@ -7,29 +7,42 @@
   <link rel="stylesheet" href="css/app.css">
   <script src="js/vendor.js"></script>
   <script src="js/app.js"></script>
+
   <script>
   </script>
 </head>
 <body ng-controller="AppCtrl">
-  <h3>
+  <h3 class="app-title">
     Photo Gallery
   </h3>
-  <h4 ng-show="session.isAuthenticated()">你好，{{session.getCurrentUser().username}}</h4>
-  <button ng-click="login()"
-          class="btn btn-primary"
-          ng-show="!session.isAuthenticated()">
-    登录相册
-  </button>
-  <button ng-click="register()"
-          class="btn btn-primary"
-          ng-show="!session.isAuthenticated()">
-    注册新账户
-  </button>
-  <button ng-click="session.logout()"
-          class="btn btn-primary"
-          ng-show="session.isAuthenticated()">
-    退出
-  </button>
+  <div class="app-title title-buttons">
+    <h4 class="app-title user-name" ng-show="session.isAuthenticated()">
+      你好，{{session.getCurrentUser().username}}
+    </h4>
+    <button ng-click="login()"
+            class="btn btn-primary"
+            ng-show="!session.isAuthenticated()">
+      登录相册
+    </button>
+    <button ng-click="register()"
+            class="btn btn-primary"
+            ng-show="!session.isAuthenticated()">
+      注册新账户
+    </button>
+    <div id="container">
+      <button ng-click="upload()"
+              class="btn btn-primary"
+              id="pickfiles"
+              ng-show="session.isAuthenticated()">
+        添加图片
+      </button>
+    </div>
+    <button ng-click="session.logout()"
+            class="btn btn-primary"
+            ng-show="session.isAuthenticated()">
+      退出
+    </button>
+  </div>
   <div ng-view></div>
 </body>
 </html>

@@ -1,0 +1,23 @@
+.app-title {
+    display: inline-block;
+    padding: .5em;
+}
+.title-buttons {
+    width: calc(100% - 13em);
+    text-align: right;
+}
+.photo-group {
+    height: 305px;
+    text-align: center;
+}
+.glyphicon-chevron-right:before {
+    content: ">";
+    font-size: 1.4em;
+}
+.glyphicon-chevron-left:before {
+    content: "<";
+    font-size: 1.4em;
+}
+#container {
+    display: inline-block;
+}

@@ -2,7 +2,11 @@
 
 angular.module('photo-gallery', [
     'ui.bootstrap'
+    'directives'
+    'session'
     'ngRoute'
+    'login'
+    'home'
 ])
 
 .config ($routeProvider, $locationProvider) ->
@@ -11,49 +15,13 @@ angular.module('photo-gallery', [
 
     $locationProvider.html5Mode(true)
 
-
-.factory '$localStorage', ->
-    set: (key, value) -> window.localStorage?[key] = JSON.stringify(value)
-    get: (key)        -> JSON.parse(localStorage?[key] || null)
-
-
-.factory 'Session', ($http, $route, $location, $rootScope) ->
-    service =
-        getCurrentUser: -> angular.copy @currentUser
-        setCurrentUser: (user) -> @currentUser = user
-        isAuthenticated: -> @currentUser?
-
-        setup: ->
-            if !@currentUser?
-                $http.get("/authenticate/user").success (user) ->
-                    console.debug user
-                    $rootScope.$broadcast 'auth:currentUserUpdated', user
-        logout: ->
-            $http.get("/authenticate/logout").success ->
-                $rootScope.$broadcast 'auth:currentUserUpdated', null
-
-    gotoDefaultPath = (auth) ->
-        if !auth && service.isAuthenticated()
-            $location.path "/home"
-        else if auth && !service.isAuthenticated()
-            $location.path "/"
-
-    $rootScope.$on 'auth:currentUserUpdated', (event, user) ->
-        service.setCurrentUser user
-        gotoDefaultPath($route?.current?.auth)
-
-    $rootScope.$on '$routeChangeSuccess', (event, current) -> _.defer ->
-        gotoDefaultPath(current?.auth)
-
-    service
-
-
-.controller 'AppCtrl', ($scope, $modal, Session) ->
+.controller 'AppCtrl', ($scope, $http, $rootScope, $modal, Session, Photo) ->
 
     Session.setup()
 
     _.extend $scope,
         session: Session
+
         login: ->
            modalInstance = $modal.open(
               backdrop    : false
@@ -68,56 +36,13 @@ angular.module('photo-gallery', [
               templateUrl : '/partials/register.html'
             )
 
-.controller 'LoginCtrl', ($scope, $http, $rootScope, $modalInstance) ->
+        upload: ->
+            $http.get("/photos/token").success (token) ->
+                console.debug "TODO upload photo with token: #{token}"
 
-    _.extend $scope,
-        username   : undefined
-        password   : undefined
-        confirmPWD : undefined
-
-        processing : false
-        error      : undefined
-
-        login: ->
-            @removeError()
-            @processing = true
-            $http(
-                method: 'POST'
-                url: "/authenticate/login"
-                params: {username: @username, password: @password}
-            ).success((user) =>
-                $rootScope.$broadcast 'auth:currentUserUpdated', user
-                $modalInstance.close()
-            ).error((error) =>
-                @processing = false
-                @error = error
-            )
-
-        register: ->
-            @removeError()
-            @processing = true
-            $http(
-                method: 'POST'
-                url: "/authenticate/register"
-                params: {username: @username, password: @password, confirmPWD: @confirmPWD}
-            ).success((newUser) =>
-                $rootScope.$broadcast 'auth:currentUserUpdated', newUser
-                $modalInstance.close()
-            ).error((error) =>
-                @processing = false
-                @error = error
-            )
-
-        removeError: ->
-            @error = undefined
-
-        cancel: ->
-            $modalInstance.dismiss('cancel')
-
-.directive 'ngEnter', ->
-    (scope, element, attrs) ->
-        element.bind "keydown keypress", (event) ->
-            if event.which == 13
-                scope.$apply(-> scope.$eval(attrs.ngEnter))
-                event.preventDefault()
+            newPhoto = _.extend new Photo,
+                id   : 'new'
+                text : 'New Photo'
+            newPhoto.$save (newPhoto) ->
+                $rootScope.$broadcast 'currentPhotosUpdated', newPhoto
 
