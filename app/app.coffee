@@ -41,9 +41,9 @@ angular.module('photo-gallery', [
             $http.get("/upload/token").success (token) ->
                 console.debug token
 
-            newPhoto = _.extend new Photo,
+            _.extend(new Photo,
                 id   : 'new'
                 text : 'New Photo'
-            newPhoto.$save (newPhoto) ->
+            ).$save (newPhoto) ->
                 $rootScope.$broadcast 'currentPhotosUpdated', newPhoto
 

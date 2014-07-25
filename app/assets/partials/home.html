@@ -1,7 +1,7 @@
 <div ng-controller="HomeCtrl">
 
   <div class="photo-group">
-    <h3 ng-if="photos.length == 0">你的相册是空的，点击左上角“添加图片”。</h3>
+    <h3 ng-if="photos.length == 0">你的相册是空的，点击右上角“添加图片”。</h3>
     <carousel interval="interval">
 
       <slide ng-repeat="photo in photos"

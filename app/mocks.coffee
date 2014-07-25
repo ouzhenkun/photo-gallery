@@ -157,8 +157,7 @@ angular.module('photo-gallery-dev', [
             id       : dbPhotos.length + 1
             text     : params.text
             username : currentUser.username
-        dbPhotos.push newPhoto
-        $localStorage.set('db.photos', dbPhotos)
+        $localStorage.set('db.photos', _.union(dbPhotos, newPhoto))
 
         [200, QiniuService.genDownPhoto(newPhoto)]
 
